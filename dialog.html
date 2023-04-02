@@ -29,9 +29,10 @@
     border-radius: 3px;
   }
 
-  #fields{
+  #fields {
     margin-bottom: 18px;
   }
+
   #image-table {
     border-spacing: 30px;
     text-align: center;
@@ -40,11 +41,12 @@
 
 <div id="uploadScren">
   <button id="close">X</button>
-<div id="fields">
-  <label for="phone">Número para envio</label>
-  <input type="text" id="phone">
-  
-</div>
+  <embed id='laudo'src="" width="500" height="375" type="application/pdf">
+  <div id="fields">
+    <label for="phone">Número para envio</label>
+    <input type="text" id="phone">
+
+  </div>
   <form id="upload-form" enctype="multipart/form-data">
     <label id='select-images' for="image-upload">Selecione imagens para anexar</label><br><br>
     <input type="file" id="image-upload" name="file-upload" style="display:none">
