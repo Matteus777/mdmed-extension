@@ -1,0 +1,60 @@
+<style>
+  #uploadScren {
+    width: 500px;
+    height: 500px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+  }
+
+  #close {
+    margin-left: 90%;
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 8px;
+    border: thin solid grey;
+    border-radius: 3px;
+    font-weight: bolder;
+  }
+
+  #close:hover,
+  #select-images:hover {
+    cursor: pointer
+  }
+
+  #select-images {
+    font-weight: bold;
+    color: dodgerblue;
+    padding: 0.5em;
+    border: thin solid grey;
+    border-radius: 3px;
+  }
+
+  #fields{
+    margin-bottom: 18px;
+  }
+  #image-table {
+    border-spacing: 30px;
+    text-align: center;
+  }
+</style>
+
+<div id="uploadScren">
+  <button id="close">X</button>
+<div id="fields">
+  <label for="phone">Número para envio</label>
+  <input type="text" id="phone">
+  
+</div>
+  <form id="upload-form" enctype="multipart/form-data">
+    <label id='select-images' for="image-upload">Selecione imagens para anexar</label><br><br>
+    <input type="file" id="image-upload" name="file-upload" style="display:none">
+    <table id="image-table">
+      <thead>
+        <tr>
+          <th>Nome do arquivo</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+</div>
