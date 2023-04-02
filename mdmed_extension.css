@@ -1,3 +1,11 @@
 #uploadImage{
-    color: aquamarine;
+    background-color: forestgreen;
+}
+
+#uploadScren{
+    border-radius: 25px;
+}
+
+th{
+    padding-left: 3px;
 }

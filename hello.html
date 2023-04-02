@@ -12,6 +12,9 @@
   <button id="openPopUp">Adicionar imagens</button>
   <dialog id="uploadScren">
     <h2>UPLOAD DE IMAGENS</h2>
+    <label for="phone"> Telefone</label>
+    <input type="text" id="phone" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
+    <button id="sendPhoneBtn" type="button">Enviar</button>
     <form id="upload-form" enctype="multipart/form-data">
       <label for="image-upload">Selecione imagens para anexar</label><br><br>
       <input type="file" id="images" name="file-upload"><br><br>
