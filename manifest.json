@@ -29,6 +29,17 @@
   ],
   "background": {
     "service_worker": "injectable.js"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mdmed.clinic/main/medical-history/view/*"
+      ],
+      "run_at": "document_end",
 
+      "js": [
+        "dialog.js"
+      ]
+    }
+  ]
 }

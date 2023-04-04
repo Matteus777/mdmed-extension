@@ -1,16 +1,24 @@
-function myFunction(param1) {
-  laudo = param1;
-}
+
 var cookie;
-function sendSession(param) {
-  cookie = param
-}
-chrome.webRequest.onBeforeRequest.addListener(
+
+chrome.webRequest.onBeforeSendHeaders.addListener(
   function (details) {
-    if (details.method == "POST" && details.requestBody) {
+    if (details.method == "POST") {
+      var header = details.requestHeaders.filter((data) => data.name.toLowerCase() == 'cookie');
+      cookie = header[0].value;
+    }
+  },
+  { urls: ["https://api.mdmed.clinic/main/patients/load/*"] },
+  ["requestHeaders", "extraHeaders"]
+);
+
+chrome.runtime.onMessage.addListener(
+  function (request, sender, sendResponse) {
+    if (request.type === "id") {
+      console.log(request.data);
+      console.log(cookie);
       (async () => {
-        const [tab] = await chrome.tabs.query({ active: true });
-        fetch(`https://api.mdmed.clinic/report/main/medical-docs/view/38181788`, {
+        fetch(`https://api.mdmed.clinic/report/main/medical-docs/view/${request.data}`, {
           method: 'GET',
           headers: {
             'Cookie': cookie,
@@ -24,61 +32,12 @@ chrome.webRequest.onBeforeRequest.addListener(
             reader.readAsDataURL(data);
             reader.onloadend = function () {
               var base64data = reader.result;
-
-              chrome.scripting.executeScript({
-                args: [base64data],
-                target: { tabId: tab.id },
-                func: myFunction
-              });
+              sendResponse({ laudoBase64: base64data });
             }
           })
-          .catch((error) => { console.error(error) });
+          .catch((error) => {  sendResponse({ laudoBase64: base64data });});
       })();
     }
-  },
-  { urls: ["https://api.mdmed.clinic/report/main/medical-docs/digital-signature-request"] },
-  ["requestBody"]
+    return true
+  }
 );
-
-chrome.webRequest.onBeforeSendHeaders.addListener(
-  function (details) {
-    if (details.method == "POST") {
-      var header = details.requestHeaders.filter((data) => data.name.toLowerCase() == 'cookie');
-      let cookie = header[0].value;
-      (async () => {
-        const [tab] = await chrome.tabs.query({ active: true });
-        chrome.scripting.executeScript({
-          args: [cookie],
-          target: { tabId: tab.id },
-          func: sendSession
-        });
-      })();
-    }
-  },
-  { urls: ["https://api.mdmed.clinic/report/main/medical-docs/digital-signature-request"] },
-  ["requestHeaders", "extraHeaders"]
-);
-
-
-chrome.webRequest.onCompleted.addListener(
-  function (details) {
-    if (details.method == 'POST') {
-      (async () => {
-        const [tab] = await chrome.tabs.query({ active: true });
-
-        chrome.scripting.executeScript({
-          target: { tabId: tab.id },
-          files: ['dialog.js']
-        });
-
-      })();
-      console.log(JSON.stringify(details));
-      if (details.statusCode == 200 || details.statusCode == 201) {
-      }
-    }
-
-  },
-  { urls: ["https://api.mdmed.clinic/report/main/medical-docs/digital-signature-request"] },
-
-);
-

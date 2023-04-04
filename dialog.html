@@ -1,8 +1,11 @@
 <style>
-  #uploadScren {
+  #uploadScreen {
+    padding: 15px;
     width: 500px;
     height: 500px;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    overflow: scroll;
+
   }
 
   #close {
@@ -30,33 +33,58 @@
   }
 
   #fields {
-    margin-bottom: 18px;
+    margin-bottom: 38px;
+    margin-top: 38px;
   }
 
   #image-table {
     border-spacing: 30px;
     text-align: center;
   }
+
+  #enviarDiv {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #enviarBtn {
+    background-color: green;
+    color: white;
+    border: none;
+    padding: 5px 8px;
+    border: thin solid grey;
+    border-radius: 3px;
+    font-weight: bolder;
+
+  }
 </style>
 
-<div id="uploadScren">
+<div id="uploadScreen">
   <button id="close">X</button>
-  <embed id='laudo'src="" width="500" height="375" type="application/pdf">
-  <div id="fields">
-    <label for="phone">Número para envio</label>
-    <input type="text" id="phone">
+  <div id="uploadBody">
+    <embed id='laudo' src="" width="350" height="375" type="application/pdf">
+    <div id="enviarDiv">
 
+      <div id="fields">
+        <label for="phone">Número para envio</label>
+        <input type="text" id="phone">
+        <button id="enviarBtn">Enviar</button>
+
+      </div>
+    </div>
+    <form id="upload-form" enctype="multipart/form-data">
+      <label id='select-images' for="image-upload">Selecione imagens para anexar</label><br><br>
+      <input type="file" id="image-upload" name="file-upload" style="display:none">
+      <table id="image-table">
+        <thead>
+          <tr>
+            <th>Nome do arquivo</th>
+            <th>Ação</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </form>
   </div>
-  <form id="upload-form" enctype="multipart/form-data">
-    <label id='select-images' for="image-upload">Selecione imagens para anexar</label><br><br>
-    <input type="file" id="image-upload" name="file-upload" style="display:none">
-    <table id="image-table">
-      <thead>
-        <tr>
-          <th>Nome do arquivo</th>
-          <th>Ação</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
 </div>
