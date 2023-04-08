@@ -9,7 +9,7 @@ const tableBody = document.querySelector('#image-table tbody')
 const phone = document.getElementById('phone')
 const sendPhoneBtn = document.getElementById('sendPhoneBtn')
 const twilioSID = 'AC8571995fe2be6c2b7a0d783ea25b99d8'
-const twilioAuthToken = 'f3e6d3dc0dc7c312d9e80cec64eba623'
+const twilioAuthToken = ''
 
 sendPhoneBtn.addEventListener('click', () => {
   const correctPhone = checkPhoneNumber(phone.value);
