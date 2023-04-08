@@ -86,10 +86,3 @@ uploadedImages.onchange = function() {
     var filename = this.value.split('\\').pop();
     addNewRow(filename);
 }
-
-function checkPhoneNumber(phoneString){
-  if(phoneString.length == 11){
-    const checkedPhone = phoneString.substring(0,2) + phoneString.substring(3);
-    return checkedPhone;
-  }
-}

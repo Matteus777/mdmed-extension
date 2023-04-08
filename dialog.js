@@ -1,4 +1,4 @@
-
+var laudoLink;
 function waitForElm(selector) {
   return new Promise(resolve => {
     if (document.querySelector(selector)) {
@@ -18,29 +18,36 @@ function waitForElm(selector) {
     });
   });
 }
-waitForElm('.medical-history-row').then((elm) => {
+waitForElm('.medical-history-row').then(async (elm) => {
   let rows = document.getElementsByClassName('medical-history-row');
   let icons;
   for (let i = 0; i < rows.length; i++) {
     icons = rows[i].getElementsByClassName('icon-feather-check-circle')
   }
-  if (icons) loadIcons(icons)
+  if (icons) await loadIcons(icons)
 });
-function loadIcons(elements) {
+async function loadIcons(elements) {
   for (let i = 0; i < elements.length; i++) {
     let wppIcon = document.createElement('button');
     wppIcon.innerText = 'Enviar via Whatsapp';
     wppIcon.style = 'margin-left:30px;background-color:green;color:white;border:none;border-radius:8px;padding:8px;';
 
-    let divParent = elements[i].parentNode.parentNode.parentNode.parentNode
-    let redirectTag = divParent.querySelector("a");
-    let tagTarget = redirectTag.getAttribute('target')
+    let divParent = elements[i].parentNode.parentNode.parentNode
+    let redirectTag = divParent.querySelector(".dropdown__button");
+    redirectTag.click();
+    await new Promise(r => setTimeout(r, 500));
+
+    let dialog = divParent.querySelector('.dropdown__menu');
+    let link = dialog.querySelector('a');
+    let tagTarget = link.getAttribute('target')
     let id = tagTarget.split('-')[1]
     wppIcon.onclick = (async () => {
       const { laudoBase64 } = await chrome.runtime.sendMessage({ type: "id", data: id });
       // do something with response here, not outside the function
+      laudoLink = laudoBase64
       openDialog(laudoBase64)
     });
+    redirectTag.click();
 
     divParent.appendChild(wppIcon);
 
@@ -83,19 +90,22 @@ function openDialog(base64) {
     }
     sendPhoneBtn.addEventListener('click', () => {
       const correctPhone = checkPhoneNumber(phone.value);
+
+      let apiKey = '57c6239e2bf579634b0919191f6da387';
       const requestOptions = {
         method: 'POST',
         headers: new Headers({
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic QUM4NTcxOTk1ZmUyYmU2YzJiN2EwZDc4M2VhMjViOTlkODpmM2U2ZDNkYzBkYzdjMzEyZDllODBjZWM2NGViYTYyMw==`,
+          'Authorization': `Basic QUMwOTljMTU5YjA2ZmYyZjE3NTQxZGE4MGIyZDk4NGM0MTo4ZTUxNjU4MTRhNWFiZjI1YjUyZTA3ZjQ0NWYyZGJmNg==`,
         }),
         body: new URLSearchParams({
           'From': 'whatsapp:+14155238886',
           'To': `whatsapp:+55${correctPhone}`,
+          'MediaUrl': laudoLink,
           'Body': `Hello there ${correctPhone} teste`
         })
       };
-      fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSID}/Messages.json`, requestOptions)
+      fetch(`https://api.twilio.com/2010-04-01/Accounts/AC099c159b06ff2f17541da80b2d984c41/Messages.json`, requestOptions)
         .then(data => {
           data.text()
         }).then(
@@ -106,6 +116,63 @@ function openDialog(base64) {
         .catch(error => {
           console.error(error)
         });
+
+      const imagesInput = uploadedImages;
+      const images = imagesInput.files;
+
+      for (let i = 0; i < images.length; i++) {
+        var reader = new FileReader();
+        reader.readAsDataURL(images[i]);
+        reader.onloadend = function () {
+          var base64data = reader.result;
+          var formData = new FormData();
+          formData.append('image', base64data.split(',')[1]);
+
+          // Display the key/value pairs
+          for (var pair of formData.entries()) {
+            console.log(pair[0] + ', ' + pair[1]);
+          }
+          fetch(`https://api.imgbb.com/1/upload?expiration=600&key=${apiKey}`, {
+            method: 'POST',
+            redirect: 'follow',
+            body: formData,
+          })
+            .then(response => response.json())
+            .then(data => {
+              const requestOptions = {
+                method: 'POST',
+                headers: new Headers({
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'Authorization': `Basic QUMwOTljMTU5YjA2ZmYyZjE3NTQxZGE4MGIyZDk4NGM0MTo4ZTUxNjU4MTRhNWFiZjI1YjUyZTA3ZjQ0NWYyZGJmNg==`,
+                }),
+                body: new URLSearchParams({
+                  'From': 'whatsapp:+14155238886',
+                  'To': `whatsapp:+55${correctPhone}`,
+                  'MediaUrl': data.data.url,
+                  'Body': `Hello there ${correctPhone} teste`
+                })
+              };
+              fetch(`https://api.twilio.com/2010-04-01/Accounts/AC099c159b06ff2f17541da80b2d984c41/Messages.json`, requestOptions)
+                .then(data => {
+                  data.text()
+                }).then(
+                  response => {
+                    console.log(response)
+                  }
+                )
+                .catch(error => {
+                  console.error(error)
+                });
+              // O URL da imagem estará disponível em 
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        }
+
+
+      }
+
     })
     function addNewRow(filename) {
       let newRow = imagesTable.insertRow(imagesTable.rows.length)
@@ -125,16 +192,16 @@ function openDialog(base64) {
       var filename = this.value.split('\\').pop();
       addNewRow(filename);
     }
-    // uploadImage.addEventListener('click', () => {
-    //   const imagesInput = uploadedImages;
-    //   const images = imagesInput.files;
+    uploadImage.addEventListener('click', () => {
+      const imagesInput = uploadedImages;
+      const images = imagesInput.files;
 
-    //   const formData = new FormData();
-    //   for (let i = 0; i < images.length; i++) {
-    //     formData.append('images[]', images[i])
-    //   }
+      const formData = new FormData();
+      for (let i = 0; i < images.length; i++) {
+        formData.append('images[]', images[i])
+      }
 
-    // });
+    });
 
   });
 }
