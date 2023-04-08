@@ -1,4 +1,4 @@
-
+var laudoLink;
 function waitForElm(selector) {
   return new Promise(resolve => {
     if (document.querySelector(selector)) {
@@ -44,6 +44,7 @@ async function loadIcons(elements) {
     wppIcon.onclick = (async () => {
       const { laudoBase64 } = await chrome.runtime.sendMessage({ type: "id", data: id });
       // do something with response here, not outside the function
+      laudoLink = laudoBase64
       openDialog(laudoBase64)
     });
     redirectTag.click();
@@ -88,50 +89,23 @@ function openDialog(base64) {
       return phoneString;
     }
     sendPhoneBtn.addEventListener('click', () => {
-      let apiKey = '57c6239e2bf579634b0919191f6da387';
       const correctPhone = checkPhoneNumber(phone.value);
 
-      const imagesInput = uploadedImages;
-      const images = imagesInput.files;
-
-      for (let i = 0; i < images.length; i++) {
-        var reader = new FileReader();
-        reader.readAsDataURL(images[i]);
-        reader.onloadend = function () {
-          var base64data = reader.result;
-          let formData = new FormData()
-          formData.append('image', base64data)
-          fetch(`https://api.imgbb.com/1/upload?expiration=600&key=${apiKey}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'multipart/form-data'
-            },
-            body: formData,
-          })
-            .then(response => response.json())
-            .then(data => {
-              console.log(data);
-              // O URL da imagem estará disponível em data.data.url
-            })
-            .catch(error => {
-              console.error(error);
-            });
-        }
-
-      }
+      let apiKey = '57c6239e2bf579634b0919191f6da387';
       const requestOptions = {
         method: 'POST',
         headers: new Headers({
           'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Basic QUM4NTcxOTk1ZmUyYmU2YzJiN2EwZDc4M2VhMjViOTlkODpmM2U2ZDNkYzBkYzdjMzEyZDllODBjZWM2NGViYTYyMw==`,
+          'Authorization': `Basic QUMwOTljMTU5YjA2ZmYyZjE3NTQxZGE4MGIyZDk4NGM0MTo4ZTUxNjU4MTRhNWFiZjI1YjUyZTA3ZjQ0NWYyZGJmNg==`,
         }),
         body: new URLSearchParams({
           'From': 'whatsapp:+14155238886',
           'To': `whatsapp:+55${correctPhone}`,
+          'MediaUrl': laudoLink,
           'Body': `Hello there ${correctPhone} teste`
         })
       };
-      fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSID}/Messages.json`, requestOptions)
+      fetch(`https://api.twilio.com/2010-04-01/Accounts/AC099c159b06ff2f17541da80b2d984c41/Messages.json`, requestOptions)
         .then(data => {
           data.text()
         }).then(
@@ -142,6 +116,63 @@ function openDialog(base64) {
         .catch(error => {
           console.error(error)
         });
+
+      const imagesInput = uploadedImages;
+      const images = imagesInput.files;
+
+      for (let i = 0; i < images.length; i++) {
+        var reader = new FileReader();
+        reader.readAsDataURL(images[i]);
+        reader.onloadend = function () {
+          var base64data = reader.result;
+          var formData = new FormData();
+          formData.append('image', base64data.split(',')[1]);
+
+          // Display the key/value pairs
+          for (var pair of formData.entries()) {
+            console.log(pair[0] + ', ' + pair[1]);
+          }
+          fetch(`https://api.imgbb.com/1/upload?expiration=600&key=${apiKey}`, {
+            method: 'POST',
+            redirect: 'follow',
+            body: formData,
+          })
+            .then(response => response.json())
+            .then(data => {
+              const requestOptions = {
+                method: 'POST',
+                headers: new Headers({
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'Authorization': `Basic QUMwOTljMTU5YjA2ZmYyZjE3NTQxZGE4MGIyZDk4NGM0MTo4ZTUxNjU4MTRhNWFiZjI1YjUyZTA3ZjQ0NWYyZGJmNg==`,
+                }),
+                body: new URLSearchParams({
+                  'From': 'whatsapp:+14155238886',
+                  'To': `whatsapp:+55${correctPhone}`,
+                  'MediaUrl': data.data.url,
+                  'Body': `Hello there ${correctPhone} teste`
+                })
+              };
+              fetch(`https://api.twilio.com/2010-04-01/Accounts/AC099c159b06ff2f17541da80b2d984c41/Messages.json`, requestOptions)
+                .then(data => {
+                  data.text()
+                }).then(
+                  response => {
+                    console.log(response)
+                  }
+                )
+                .catch(error => {
+                  console.error(error)
+                });
+              // O URL da imagem estará disponível em 
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        }
+
+
+      }
+
     })
     function addNewRow(filename) {
       let newRow = imagesTable.insertRow(imagesTable.rows.length)

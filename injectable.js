@@ -26,17 +26,9 @@ chrome.runtime.onMessage.addListener(
 
           },
           redirect: 'follow',
-        }).then((res) => res.blob())
-          .then((data) => {
-
-            var reader = new FileReader();
-            reader.readAsDataURL(data);
-            reader.onloadend = function () {
-              var base64data = reader.result;
-              sendResponse({ laudoBase64: base64data });
-            }
-          })
-          .catch((error) => {  sendResponse({ laudoBase64: base64data });});
+        }).then((res) =>
+          sendResponse({ laudoBase64: res.url })
+        )          .catch((error) => { sendResponse({ laudoBase64: base64data }); });
       })();
     }
     return true
