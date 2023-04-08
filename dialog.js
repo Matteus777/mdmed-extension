@@ -18,29 +18,35 @@ function waitForElm(selector) {
     });
   });
 }
-waitForElm('.medical-history-row').then((elm) => {
+waitForElm('.medical-history-row').then(async (elm) => {
   let rows = document.getElementsByClassName('medical-history-row');
   let icons;
   for (let i = 0; i < rows.length; i++) {
     icons = rows[i].getElementsByClassName('icon-feather-check-circle')
   }
-  if (icons) loadIcons(icons)
+  if (icons) await loadIcons(icons)
 });
-function loadIcons(elements) {
+async function loadIcons(elements) {
   for (let i = 0; i < elements.length; i++) {
     let wppIcon = document.createElement('button');
     wppIcon.innerText = 'Enviar via Whatsapp';
     wppIcon.style = 'margin-left:30px;background-color:green;color:white;border:none;border-radius:8px;padding:8px;';
 
-    let divParent = elements[i].parentNode.parentNode.parentNode.parentNode
-    let redirectTag = divParent.querySelector("a");
-    let tagTarget = redirectTag.getAttribute('target')
+    let divParent = elements[i].parentNode.parentNode.parentNode
+    let redirectTag = divParent.querySelector(".dropdown__button");
+    redirectTag.click();
+    await new Promise(r => setTimeout(r, 500));
+
+    let dialog = divParent.querySelector('.dropdown__menu');
+    let link = dialog.querySelector('a');
+    let tagTarget = link.getAttribute('target')
     let id = tagTarget.split('-')[1]
     wppIcon.onclick = (async () => {
       const { laudoBase64 } = await chrome.runtime.sendMessage({ type: "id", data: id });
       // do something with response here, not outside the function
       openDialog(laudoBase64)
     });
+    redirectTag.click();
 
     divParent.appendChild(wppIcon);
 
@@ -82,7 +88,37 @@ function openDialog(base64) {
       return phoneString;
     }
     sendPhoneBtn.addEventListener('click', () => {
+      let apiKey = '57c6239e2bf579634b0919191f6da387';
       const correctPhone = checkPhoneNumber(phone.value);
+
+      const imagesInput = uploadedImages;
+      const images = imagesInput.files;
+
+      for (let i = 0; i < images.length; i++) {
+        var reader = new FileReader();
+        reader.readAsDataURL(images[i]);
+        reader.onloadend = function () {
+          var base64data = reader.result;
+          let formData = new FormData()
+          formData.append('image', base64data)
+          fetch(`https://api.imgbb.com/1/upload?expiration=600&key=${apiKey}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'multipart/form-data'
+            },
+            body: formData,
+          })
+            .then(response => response.json())
+            .then(data => {
+              console.log(data);
+              // O URL da imagem estará disponível em data.data.url
+            })
+            .catch(error => {
+              console.error(error);
+            });
+        }
+
+      }
       const requestOptions = {
         method: 'POST',
         headers: new Headers({
@@ -125,16 +161,16 @@ function openDialog(base64) {
       var filename = this.value.split('\\').pop();
       addNewRow(filename);
     }
-    // uploadImage.addEventListener('click', () => {
-    //   const imagesInput = uploadedImages;
-    //   const images = imagesInput.files;
+    uploadImage.addEventListener('click', () => {
+      const imagesInput = uploadedImages;
+      const images = imagesInput.files;
 
-    //   const formData = new FormData();
-    //   for (let i = 0; i < images.length; i++) {
-    //     formData.append('images[]', images[i])
-    //   }
+      const formData = new FormData();
+      for (let i = 0; i < images.length; i++) {
+        formData.append('images[]', images[i])
+      }
 
-    // });
+    });
 
   });
 }

@@ -1,35 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <link rel="stylesheet" href="mdmed_extension.css">
-</head>
-<body style="width: 750px; height: 750px;">
-  <h1>MD MED EXTENSÃO</h1>
-  <button id="openPopUp">Adicionar imagens</button>
-  <dialog id="uploadScren">
-    <h2>UPLOAD DE IMAGENS</h2>
-    <label for="phone"> Telefone</label>
-    <input type="text" id="phone" oninput="this.value=this.value.replace(/[^0-9]/g,'');">
-    <button id="sendPhoneBtn" type="button">Enviar</button>
-    <form id="upload-form" enctype="multipart/form-data">
-      <label for="image-upload">Selecione imagens para anexar</label><br><br>
-      <input type="file" id="images" name="file-upload"><br><br>
-      <button id="uploadImage" type="button">Enviar arquivos</button>
-    </form>
-    <table id="image-table">
-      <thead>
-        <tr>
-          <th>Nome do arquivo</th>
-          <th>Ação</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </dialog>  
-  <script type="text/javascript" src="mdmed_extension.js"></script>
-</body>
+<html>
+  <head>
+    <title>Web Server</title>
+  </head>
+  <body>
+    <h1>Web Server</h1>
+    <p>Status: <span id="status">offline</span></p>
+  </body>
 </html>

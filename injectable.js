@@ -1,4 +1,5 @@
 
+
 var cookie;
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
