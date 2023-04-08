@@ -9,10 +9,11 @@ const tableBody = document.querySelector('#image-table tbody')
 const phone = document.getElementById('phone')
 const sendPhoneBtn = document.getElementById('sendPhoneBtn')
 const twilioSID = 'AC8571995fe2be6c2b7a0d783ea25b99d8'
-const twilioAuthToken = '9ca384a45e953b231fba69e230ae68ba'
+const twilioAuthToken = 'f3e6d3dc0dc7c312d9e80cec64eba623'
 
 sendPhoneBtn.addEventListener('click', () => {
   const correctPhone = checkPhoneNumber(phone.value);
+  fetch('teste_ico.png').then(data => {console.log(data)}).then(response => { console.log(response)}).catch(error => {console.log(error)})
   const requestOptions = {
     method: 'POST',
     headers: new Headers({
@@ -22,7 +23,8 @@ sendPhoneBtn.addEventListener('click', () => {
     body: new URLSearchParams({
       'From': 'whatsapp:+14155238886',
       'To': `whatsapp:+55${correctPhone}`,
-      'Body': `Hello there ${correctPhone} teste`
+      'Body': `Hello there ${correctPhone} teste`,
+      'MediaUrl': 'file:///C:/devel/mdmed-extension/teste_ico.png'
     })
   };
   fetch(`https://api.twilio.com/2010-04-01/Accounts/${twilioSID}/Messages.json`, requestOptions)
