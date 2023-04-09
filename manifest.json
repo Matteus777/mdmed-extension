@@ -34,10 +34,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://mdmed.clinic/main/medical-history/view/*"
+        "https://mdmed.clinic/main/medical-history/*"
       ],
-      "run_at": "document_end",
-
       "js": [
         "dialog.js"
       ]

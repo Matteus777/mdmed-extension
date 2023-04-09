@@ -20,9 +20,9 @@ function waitForElm(selector) {
 }
 waitForElm('.medical-history-row').then(async (elm) => {
   let rows = document.getElementsByClassName('medical-history-row');
-  let icons;
+  let icons = [];
   for (let i = 0; i < rows.length; i++) {
-    icons = rows[i].getElementsByClassName('icon-feather-check-circle')
+    icons = document.getElementsByClassName('icon-feather-check-circle');
   }
   if (icons) await loadIcons(icons)
 });
@@ -39,7 +39,7 @@ async function loadIcons(elements) {
 
     let dialog = divParent.querySelector('.dropdown__menu');
     let link = dialog.querySelector('a');
-    let tagTarget = link.getAttribute('target')
+    let tagTarget = link.getAttribute('target');
     let id = tagTarget.split('-')[1]
     wppIcon.onclick = (async () => {
       const { laudoBase64 } = await chrome.runtime.sendMessage({ type: "id", data: id });
@@ -73,7 +73,6 @@ function openDialog(base64) {
       document.body.removeChild(dialog);
     });
 
-    const uploadImage = document.getElementById('image-upload')
     const uploadedImages = document.getElementById('image-upload')
     const imagesTable = document.getElementById('image-table')
     const elementLaudo = document.getElementById('laudo')
@@ -102,7 +101,6 @@ function openDialog(base64) {
           'From': 'whatsapp:+14155238886',
           'To': `whatsapp:+55${correctPhone}`,
           'MediaUrl': laudoLink,
-          'Body': `Hello there ${correctPhone} teste`
         })
       };
       fetch(`https://api.twilio.com/2010-04-01/Accounts/AC099c159b06ff2f17541da80b2d984c41/Messages.json`, requestOptions)
@@ -121,7 +119,7 @@ function openDialog(base64) {
       const images = imagesInput.files;
 
       for (let i = 0; i < images.length; i++) {
-        var reader = new FileReader();
+        let reader = new FileReader();
         reader.readAsDataURL(images[i]);
         reader.onloadend = function () {
           var base64data = reader.result;
@@ -174,35 +172,34 @@ function openDialog(base64) {
       }
 
     })
+
     function addNewRow(filename) {
       let newRow = imagesTable.insertRow(imagesTable.rows.length)
       let filenameCell = newRow.insertCell(0);
-      let deleteCell = newRow.insertCell(1);
 
       filenameCell.innerHTML = filename;
 
-      let deleteButton = document.createElement("button");
-      deleteButton.innerHTML = "Deletar";
-      deleteButton.onclick = function () {
-        imagesTable.deleteRow(newRow.rowIndex);
-      };
-      deleteCell.appendChild(deleteButton);
     }
-    uploadedImages.onchange = function () {
-      var filename = this.value.split('\\').pop();
-      addNewRow(filename);
-    }
-    uploadImage.addEventListener('click', () => {
-      const imagesInput = uploadedImages;
-      const images = imagesInput.files;
-
-      const formData = new FormData();
-      for (let i = 0; i < images.length; i++) {
-        formData.append('images[]', images[i])
+    function clearTable() {
+      var tableHeaderRowCount = 1;
+      var table = document.getElementById('image-table');
+      var rowCount = table.rows.length;
+      for (var i = tableHeaderRowCount; i < rowCount; i++) {
+        table.deleteRow(tableHeaderRowCount);
       }
+    }
 
-    });
+    uploadedImages.onchange = function (evt) {
+      clearTable()
+      for (let i = 0; i < evt.target.files.length; i++) {
+        addNewRow(evt.target.files[i].name);
+      }
+    }
+
+
 
   });
+
+
 }
 
