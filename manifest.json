@@ -34,11 +34,12 @@
   "content_scripts": [
     {
       "matches": [
-        "https://mdmed.clinic/main/medical-history/*"
+        "https://*/*"
       ],
       "js": [
         "dialog.js"
-      ]
+      ],
+      "all_frames": true
     }
   ]
 }
