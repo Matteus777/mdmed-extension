@@ -53,11 +53,14 @@ function initContentScript() {
   });
   async function loadIcons(elements) {
     for (let i = 0; i < elements.length; i++) {
+      let divParent = elements[i].parentNode.parentNode.parentNode
+      let checkIcon = divParent.querySelector(`#btn${i}`);
+      if (checkIcon) continue;
       let wppIcon = document.createElement('button');
+      wppIcon.id = 'btn' + i;
       wppIcon.innerText = 'Enviar via Whatsapp';
       wppIcon.style = 'margin-left:30px;background-color:green;color:white;border:none;border-radius:8px;padding:8px;';
 
-      let divParent = elements[i].parentNode.parentNode.parentNode
       let redirectTag = divParent.querySelector(".dropdown__button");
       redirectTag.click();
       await new Promise(r => setTimeout(r, 500));
@@ -120,15 +123,15 @@ function initContentScript() {
           method: 'POST',
           headers: new Headers({
             'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': `Basic QUMwOTljMTU5YjA2ZmYyZjE3NTQxZGE4MGIyZDk4NGM0MTo4ZTUxNjU4MTRhNWFiZjI1YjUyZTA3ZjQ0NWYyZGJmNg==`,
+            'Authorization': `Basic QUNiODQ0OTdkYmZkOTcxMmE5YWYzNTA1ODFkODdkN2FiMzoyNTgwOWZjNzBjMDgwYzliZDJmNjE4MzUyNWM4N2NiNw==`,
           }),
           body: new URLSearchParams({
-            'From': 'whatsapp:+14155238886',
+            'From': 'whatsapp:+555199150305',
             'To': `whatsapp:+55${correctPhone}`,
             'MediaUrl': laudoLink,
           })
         };
-        fetch(`https://api.twilio.com/2010-04-01/Accounts/AC099c159b06ff2f17541da80b2d984c41/Messages.json`, requestOptions)
+        fetch(`https://api.twilio.com/2010-04-01/Accounts/ACb84497dbfd9712a9af350581d87d7ab3/Messages.json`, requestOptions)
           .then(data => {
             data.text()
           }).then(
@@ -166,16 +169,16 @@ function initContentScript() {
                   method: 'POST',
                   headers: new Headers({
                     'Content-Type': 'application/x-www-form-urlencoded',
-                    'Authorization': `Basic QUMwOTljMTU5YjA2ZmYyZjE3NTQxZGE4MGIyZDk4NGM0MTo4ZTUxNjU4MTRhNWFiZjI1YjUyZTA3ZjQ0NWYyZGJmNg==`,
+                    'Authorization': `Basic QUNiODQ0OTdkYmZkOTcxMmE5YWYzNTA1ODFkODdkN2FiMzoyNTgwOWZjNzBjMDgwYzliZDJmNjE4MzUyNWM4N2NiNw==`,
                   }),
                   body: new URLSearchParams({
-                    'From': 'whatsapp:+14155238886',
+                    'From': 'whatsapp:+555199150305',
                     'To': `whatsapp:+55${correctPhone}`,
                     'MediaUrl': data.data.url,
-                    'Body': `Hello there ${correctPhone} teste`
+                    'Body': 'Aqui estão seu laudo e imagens.'
                   })
                 };
-                fetch(`https://api.twilio.com/2010-04-01/Accounts/AC099c159b06ff2f17541da80b2d984c41/Messages.json`, requestOptions)
+                fetch(`https://api.twilio.com/2010-04-01/Accounts/ACb84497dbfd9712a9af350581d87d7ab3/Messages.json`, requestOptions)
                   .then(data => {
                     data.text()
                   }).then(
