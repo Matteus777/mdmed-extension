@@ -1,4 +1,6 @@
 var ACCESS_TOKEN = 'sl.Bdd1yTa793klkxGB0-688N08EYR0PhPXIGbDSO-06Qy18ZNqAnDgeqNBw--nV5s5nnpWg3skKdmEnyZZT84_7EK7Z1CBsOlNgAKcusZ8xF5Gz7bSXUsmLQd9r_tieLeQ9UQEvHd1'
+var REFRESH_TOKEN = 'IEsPScDQmxkAAAAAAAAAAR3OYJOYqycs7ivq6PCjm5alFeu3eJyGSc7Y1L26YTqz';
+var BASIC_TOKEN = 'dTVsNDU3ZXpwZ2czb2pyOml3czN6MjMwZmVsZ3BncA==';
 function addLocationObserver(callback) {
 
   // Options for the observer (which mutations to observe)
@@ -121,89 +123,51 @@ function initContentScript() {
         let apiKey = '57c6239e2bf579634b0919191f6da387';
         const imagesInput = uploadedImages;
         const images = imagesInput.files;
-        fetch(base64)
-          .then(res => res.blob())
-          .then(buffer => {
-            let laudo = new File([buffer], "laudo.pdf");
-            let myHeaders = new Headers();
-            myHeaders.append("Authorization", `Bearer ${ACCESS_TOKEN}`);
-            myHeaders.append("Content-Type", "application/octet-stream");
-            myHeaders.append("Dropbox-API-Arg", "{\"autorename\":true,\"mode\":\"add\",\"mute\":false,\"path\":\"/" + correctPhone + "/" + laudo.name + "\",\"strict_conflict\":false}");
-            let requestOptions = {
-              method: 'POST',
-              headers: myHeaders,
-              body: laudo,
-              redirect: 'follow'
-            };
-            fetch("https://content.dropboxapi.com/2/files/upload", requestOptions)
-              .then(response => response.text())
-              .then(result => console.log(result))
-              .catch(error => console.log('error', error))
-          })
-          .catch(err => console.error(err));
-        for (let i = 0; i < images.length; i++) {
-          let file = images[i]
-          let myHeaders = new Headers();
-          myHeaders.append("Authorization", `Bearer ${ACCESS_TOKEN}`);
-          myHeaders.append("Content-Type", "application/octet-stream");
-          myHeaders.append("Dropbox-API-Arg", "{\"autorename\":true,\"mode\":\"add\",\"mute\":false,\"path\":\"/" + correctPhone + "/" + file.name + "\",\"strict_conflict\":false}");
-          let requestOptions = {
-            method: 'POST',
-            headers: myHeaders,
-            body: file,
-            redirect: 'follow'
-          };
-          fetch("https://content.dropboxapi.com/2/files/upload", requestOptions)
-            .then(response => response.text())
-            .then(result => console.log(result))
-            .catch(error => console.log('error', error))
+        var FOLDER = correctPhone +"_"+ new Date().getTime()
 
-
-        }
-        fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
+        fetch('https://api.dropbox.com/oauth2/token', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${ACCESS_TOKEN}`,
-            'Content-Type': 'application/json'
+            'Authorization': 'Basic ' + BASIC_TOKEN,
+            'Content-Type': 'application/x-www-form-urlencoded'
           },
-          body: JSON.stringify({
-            path: `/${correctPhone}`,
-            settings: {
-              access: "viewer",
-              allow_download: true,
-              audience: "public",
-              requested_visibility: "public"
-          }
+          body: new URLSearchParams({
+            'grant_type': 'refresh_token',
+            'refresh_token': REFRESH_TOKEN
           })
         })
-          .then(response => response.json())
-          .then(data => {
-            requestOptions = {
-              method: 'POST',
-              headers: new Headers({
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': `Basic QUNiODQ0OTdkYmZkOTcxMmE5YWYzNTA1ODFkODdkN2FiMzoyNTgwOWZjNzBjMDgwYzliZDJmNjE4MzUyNWM4N2NiNw==`,
-              }),
-              body: new URLSearchParams({
-                'From': 'whatsapp:+555199150305',
-                'To': `whatsapp:+55${correctPhone}`,
-                'Body': `Acesse o link para ter acesso ao seu laudo e imagens ${data.url??", link ja enviado anteriormente."}`
-              })
-            };
-            fetch(`https://api.twilio.com/2010-04-01/Accounts/ACb84497dbfd9712a9af350581d87d7ab3/Messages.json`, requestOptions)
-              .then(data => {
-                data.text()
-              }).then(
-                response => {
-                  alert("Mensagem enviada!");
-                }
-              )
-              .catch(error => {
-                console.error(error)
-              });
+          .then(response => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok');
+            }
+            return response.json();
           })
-          .catch(error => console.error(error));
-
+          .then(data => {
+            ACCESS_TOKEN = data.access_token;
+            enviarLaudo(base64,FOLDER,correctPhone);
+            for (let i = 0; i < images.length; i++) {
+              let file = images[i]
+              let myHeaders = new Headers();
+              myHeaders.append("Authorization", `Bearer ${ACCESS_TOKEN}`);
+              myHeaders.append("Content-Type", "application/octet-stream");
+              myHeaders.append("Dropbox-API-Arg", "{\"autorename\":true,\"mode\":\"add\",\"mute\":false,\"path\":\"/" + FOLDER + "/" + file.name + "\",\"strict_conflict\":false}");
+              let requestOptions = {
+                method: 'POST',
+                headers: myHeaders,
+                body: file,
+                redirect: 'follow'
+              };
+              fetch("https://content.dropboxapi.com/2/files/upload", requestOptions)
+                .then(response => response.text())
+                .then(result => {
+                  console.log("imagem " + i + 1 + "enviada")
+                })
+                .catch(error => console.log('error', error))
+            }
+          })
+          .catch(error => {
+            // handle error
+          });
       })
 
       function addNewRow(filename) {
@@ -234,6 +198,72 @@ function initContentScript() {
     });
 
 
+    function enviarLaudo(base64,FOLDER,correctPhone) {
+      fetch(base64)
+        .then(res => res.blob())
+        .then(buffer => {
+          let laudo = new File([buffer], "laudo.pdf");
+          let myHeaders = new Headers();
+          myHeaders.append("Authorization", `Bearer ${ACCESS_TOKEN}`);
+          myHeaders.append("Content-Type", "application/octet-stream");
+          myHeaders.append("Dropbox-API-Arg", "{\"autorename\":true,\"mode\":\"add\",\"mute\":false,\"path\":\"/" + FOLDER + "/" + laudo.name + "\",\"strict_conflict\":false}");
+          let requestOptions = {
+            method: 'POST',
+            headers: myHeaders,
+            body: laudo,
+            redirect: 'follow'
+          };
+          fetch("https://content.dropboxapi.com/2/files/upload", requestOptions)
+            .then(response => response.text())
+            .then(result => {
+              fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${ACCESS_TOKEN}`,
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    path: `/${FOLDER}`,
+                    settings: {
+                      access: "viewer",
+                      allow_download: true,
+                      audience: "public",
+                      requested_visibility: "public"
+                    }
+                  })
+                })
+                  .then(response => response.json())
+                  .then(data => {
+                    requestOptions = {
+                      method: 'POST',
+                      headers: new Headers({
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Authorization': `Basic QUNiODQ0OTdkYmZkOTcxMmE5YWYzNTA1ODFkODdkN2FiMzoyNTgwOWZjNzBjMDgwYzliZDJmNjE4MzUyNWM4N2NiNw==`,
+                      }),
+                      body: new URLSearchParams({
+                        'From': 'whatsapp:+555199150305',
+                        'To': `whatsapp:+55${correctPhone}`,
+                        'Body': `Acesse o link para ter acesso ao seu laudo e imagens ${data.url ?? ", link ja enviado anteriormente."}`
+                      })
+                    };
+                    fetch(`https://api.twilio.com/2010-04-01/Accounts/ACb84497dbfd9712a9af350581d87d7ab3/Messages.json`, requestOptions)
+                      .then(data => {
+                        data.text()
+                      }).then(
+                        response => {
+                          alert("Mensagem enviada!");
+                        }
+                      )
+                      .catch(error => {
+                        console.error(error)
+                      });
+                  })
+                  .catch(error => console.error(error));
+            })
+            .catch(error => console.log('error', error))
+        })
+        .catch(err => console.error(err));
+    }
   }
 
 }
