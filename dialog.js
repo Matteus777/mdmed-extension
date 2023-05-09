@@ -144,9 +144,10 @@ function initContentScript() {
           })
           .then(data => {
             ACCESS_TOKEN = data.access_token;
-            enviarLaudo(base64,FOLDER,correctPhone);
-            for (let i = 0; i < images.length; i++) {
-              let file = images[i]
+            let imagens = [base64,...images];
+            // enviarLaudo(base64,FOLDER,correctPhone);
+            for (let i = 0; i < imagens.length; i++) {
+              let file = imagens[i]
               let myHeaders = new Headers();
               myHeaders.append("Authorization", `Bearer ${ACCESS_TOKEN}`);
               myHeaders.append("Content-Type", "application/octet-stream");
@@ -160,7 +161,51 @@ function initContentScript() {
               fetch("https://content.dropboxapi.com/2/files/upload", requestOptions)
                 .then(response => response.text())
                 .then(result => {
-                  console.log("imagem " + i + 1 + "enviada")
+                  if(imagens.length-1==i){
+                    fetch('https://api.dropboxapi.com/2/sharing/create_shared_link_with_settings', {
+                      method: 'POST',
+                      headers: {
+                        'Authorization': `Bearer ${ACCESS_TOKEN}`,
+                        'Content-Type': 'application/json'
+                      },
+                      body: JSON.stringify({
+                        path: `/${FOLDER}`,
+                        settings: {
+                          access: "viewer",
+                          allow_download: true,
+                          audience: "public",
+                          requested_visibility: "public"
+                        }
+                      })
+                    })
+                      .then(response => response.json())
+                      .then(data => {
+                        requestOptions = {
+                          method: 'POST',
+                          headers: new Headers({
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Authorization': `Basic QUNiODQ0OTdkYmZkOTcxMmE5YWYzNTA1ODFkODdkN2FiMzoyNTgwOWZjNzBjMDgwYzliZDJmNjE4MzUyNWM4N2NiNw==`,
+                          }),
+                          body: new URLSearchParams({
+                            'From': 'whatsapp:+555199150305',
+                            'To': `whatsapp:+55${correctPhone}`,
+                            'Body': `Acesse o link para ter acesso ao seu laudo e imagens ${data.url ?? ", link ja enviado anteriormente."}`
+                          })
+                        };
+                        fetch(`https://api.twilio.com/2010-04-01/Accounts/ACb84497dbfd9712a9af350581d87d7ab3/Messages.json`, requestOptions)
+                          .then(data => {
+                            data.text()
+                          }).then(
+                            response => {
+                              alert("Mensagem enviada!");
+                            }
+                          )
+                          .catch(error => {
+                            console.error(error)
+                          });
+                      })
+                      .catch(error => console.error(error));
+                  }
                 })
                 .catch(error => console.log('error', error))
             }
@@ -199,6 +244,7 @@ function initContentScript() {
 
 
     function enviarLaudo(base64,FOLDER,correctPhone) {
+  
       fetch(base64)
         .then(res => res.blob())
         .then(buffer => {

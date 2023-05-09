@@ -19,7 +19,7 @@ chrome.runtime.onMessage.addListener(
             'Cookie': cookie,
 
           },
-          redirect: 'follow',
+          redirect: 'manual',
         }).then((res) =>
           sendResponse({ laudoBase64: res.url })
         ).catch((error) => { sendResponse({ laudoBase64: base64data }); });
