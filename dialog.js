@@ -64,11 +64,11 @@ function initContentScript() {
       wppIcon.innerText = 'Enviar via Whatsapp';
       wppIcon.style = 'margin-left:30px;background-color:green;color:white;border:none;border-radius:8px;padding:8px;';
 
-      let redirectTag = divParent.querySelector(".dropdown__button");
+      let redirectTag = divParent.querySelector(".mf__dropdown__button");
       redirectTag.click();
       await new Promise(r => setTimeout(r, 500));
 
-      let dialog = divParent.querySelector('.dropdown__menu');
+      let dialog = divParent.querySelector('.mf__dropdown__menu');
       let link = dialog.querySelector('a');
       let tagTarget = link.getAttribute('target');
       let id = tagTarget.split('-')[1]
